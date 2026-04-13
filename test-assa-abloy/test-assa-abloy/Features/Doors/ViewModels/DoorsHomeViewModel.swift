@@ -10,6 +10,7 @@ import Combine
 
 @MainActor
 final class DoorsHomeViewModel: ObservableObject {
+    @Published var searchText = ""
     @Published private(set) var doors: [DoorPresentation] = []
     @Published private(set) var isLoading = false
     @Published var errorMessage: String?
@@ -26,11 +27,21 @@ final class DoorsHomeViewModel: ObservableObject {
     }
 
     func loadDoors(authToken: String?, forceRefresh: Bool = false) async {
+        await fetchDoors(authToken: authToken, query: searchText, forceRefresh: forceRefresh)
+    }
+
+    func searchDoors(authToken: String?) async {
+        await fetchDoors(authToken: authToken, query: searchText, forceRefresh: true)
+    }
+
+    private func fetchDoors(authToken: String?, query: String, forceRefresh: Bool) async {
         guard !isLoading else {
             return
         }
 
-        guard forceRefresh || !hasLoaded else {
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard forceRefresh || !hasLoaded || !trimmedQuery.isEmpty else {
             return
         }
 
@@ -45,9 +56,15 @@ final class DoorsHomeViewModel: ObservableObject {
         defer { isLoading = false }
 
         do {
-            let response = try await doorsService.fetchDoors(authToken: authToken, page: 0, size: 20)
+            let response: DoorsResponse
+            if trimmedQuery.isEmpty {
+                response = try await doorsService.fetchDoors(authToken: authToken, page: 0, size: 20)
+                hasLoaded = true
+            } else {
+                response = try await doorsService.findDoors(authToken: authToken, name: trimmedQuery, page: 0, size: 20)
+            }
+
             doors = response.content.map(\.presentation)
-            hasLoaded = true
             errorMessage = nil
         } catch {
             if shouldIgnore(error) {
