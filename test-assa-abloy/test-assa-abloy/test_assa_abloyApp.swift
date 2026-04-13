@@ -9,8 +9,12 @@ import SwiftUI
 
 @main
 struct test_assa_abloyApp: App {
-    @StateObject private var session = AppSession()
+    @StateObject private var session: AppSession
     @StateObject private var router = AppRouter()
+
+    init() {
+        _session = StateObject(wrappedValue: AppSession(sessionStore: SessionStore()))
+    }
 
     var body: some Scene {
         WindowGroup {
