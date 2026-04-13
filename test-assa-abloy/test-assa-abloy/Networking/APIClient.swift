@@ -9,7 +9,7 @@ import Foundation
 
 @MainActor
 protocol APIClient {
-    func send<Response: Decodable & Sendable>(_ request: APIRequest, as responseType: Response.Type) async throws -> Response
+    func send<Response: Decodable>(_ request: APIRequest, as responseType: Response.Type) async throws -> Response
     func send(_ request: APIRequest) async throws
 }
 
