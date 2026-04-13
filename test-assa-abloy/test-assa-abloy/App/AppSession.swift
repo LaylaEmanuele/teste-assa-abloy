@@ -30,10 +30,6 @@ final class AppSession: ObservableObject {
         }
     }
 
-    func signIn() {
-        startSession(with: UUID().uuidString)
-    }
-
     func startSession(with token: String) {
         do {
             try sessionStore.saveToken(token)
