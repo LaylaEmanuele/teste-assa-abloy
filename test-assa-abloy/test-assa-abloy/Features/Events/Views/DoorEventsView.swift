@@ -17,6 +17,11 @@ struct DoorEventsView: View {
                 Text(door.address)
                     .foregroundStyle(.secondary)
             }
+
+            Section("Informacoes") {
+                LabeledContent("Serial", value: door.serial)
+                LabeledContent("Bateria", value: "\(door.batteryLevel)%")
+            }
         }
         .navigationTitle("Eventos")
     }

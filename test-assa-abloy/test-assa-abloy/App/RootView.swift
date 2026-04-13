@@ -35,5 +35,8 @@ struct RootView: View {
                 }
             }
         }
+        .onChange(of: session.isAuthenticated) { _, _ in
+            router.popToRoot()
+        }
     }
 }

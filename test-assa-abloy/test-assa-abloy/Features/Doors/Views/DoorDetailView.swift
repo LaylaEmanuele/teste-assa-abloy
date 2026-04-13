@@ -12,9 +12,18 @@ struct DoorDetailView: View {
 
     var body: some View {
         List {
-            LabeledContent("Nome", value: door.name)
-            LabeledContent("Endereço", value: door.address)
-            LabeledContent("Bateria", value: "\(door.batteryLevel)%")
+            Section("Informacoes") {
+                LabeledContent("Nome", value: door.name)
+                LabeledContent("Serial", value: door.serial)
+                LabeledContent("MAC", value: door.lockMac)
+                LabeledContent("Bateria", value: "\(door.batteryLevel)%")
+            }
+
+            Section("Localizacao") {
+                LabeledContent("Endereco", value: door.address)
+                LabeledContent("Latitude", value: String(format: "%.4f", door.latitude))
+                LabeledContent("Longitude", value: String(format: "%.4f", door.longitude))
+            }
         }
         .navigationTitle("Detalhe")
     }
