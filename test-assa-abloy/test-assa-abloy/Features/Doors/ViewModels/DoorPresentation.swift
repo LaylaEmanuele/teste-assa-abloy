@@ -9,14 +9,26 @@ import Foundation
 
 struct DoorPresentation: Hashable, Identifiable {
     let id: Int
+    let serial: String
+    let lockMac: String
     let name: String
     let address: String
+    let latitude: Double
+    let longitude: Double
     let batteryLevel: Int
+}
 
-    static let sample = DoorPresentation(
-        id: 1,
-        name: "Museu do Ipiranga",
-        address: "Parque da Independência, São Paulo - SP",
-        batteryLevel: 87
-    )
+extension DoorDTO {
+    var presentation: DoorPresentation {
+        DoorPresentation(
+            id: id,
+            serial: serial,
+            lockMac: lockMac,
+            name: name,
+            address: address,
+            latitude: latitude,
+            longitude: longitude,
+            batteryLevel: battery
+        )
+    }
 }

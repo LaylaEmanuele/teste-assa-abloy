@@ -10,23 +10,65 @@ import SwiftUI
 struct DoorsHomeView: View {
     @EnvironmentObject private var router: AppRouter
     @EnvironmentObject private var session: AppSession
-
-    private let sampleDoor = DoorPresentation.sample
+    @StateObject private var viewModel = DoorsHomeViewModel()
 
     var body: some View {
-        List {
-            Section("Boas-vindas") {
-                Text("Selecione uma porta para visualizar os detalhes ou acessar os eventos.")
-                    .foregroundStyle(.secondary)
-            }
+        Group {
+            if viewModel.isLoading && viewModel.doors.isEmpty {
+                ProgressView("Carregando portas...")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                List {
+                    if let errorMessage = viewModel.errorMessage, !errorMessage.isEmpty {
+                        Section {
+                            Text(errorMessage)
+                                .foregroundStyle(.red)
+                        }
+                    }
 
-            Section("Fluxo de navegação") {
-                Button(sampleDoor.name) {
-                    router.push(.doorDetails(sampleDoor))
+                    if viewModel.doors.isEmpty && !viewModel.isLoading {
+                        Section {
+                            Text("Nenhuma porta encontrada.")
+                                .foregroundStyle(.secondary)
+                        }
+                    } else {
+                        Section("Portas") {
+                            ForEach(viewModel.doors) { door in
+                                Button {
+                                    router.push(.doorDetails(door))
+                                } label: {
+                                    VStack(alignment: .leading, spacing: 6) {
+                                        HStack {
+                                            Text(door.name)
+                                                .font(.headline)
+                                                .foregroundStyle(.primary)
+
+                                            Spacer()
+
+                                            Text("\(door.batteryLevel)%")
+                                                .font(.subheadline.weight(.semibold))
+                                                .foregroundStyle(batteryColor(for: door.batteryLevel))
+                                        }
+
+                                        Text(door.address)
+                                            .font(.subheadline)
+                                            .foregroundStyle(.secondary)
+                                            .multilineTextAlignment(.leading)
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .buttonStyle(.plain)
+                                .contextMenu {
+                                    Button("Ver eventos") {
+                                        router.push(.events(door))
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-
-                Button("Ver eventos da porta") {
-                    router.push(.events(sampleDoor))
+                .refreshable {
+                    await viewModel.loadDoors(authToken: session.token, forceRefresh: true)
                 }
             }
         }
@@ -38,6 +80,30 @@ struct DoorsHomeView: View {
                     router.popToRoot()
                 }
             }
+        }
+        .task(id: session.token) {
+            await viewModel.loadDoors(authToken: session.token)
+        }
+        .onAppear {
+            guard viewModel.doors.isEmpty else {
+                return
+            }
+
+            Task {
+                try? await Task.sleep(for: .milliseconds(350))
+                await viewModel.loadDoors(authToken: session.token, forceRefresh: true)
+            }
+        }
+    }
+
+    private func batteryColor(for level: Int) -> Color {
+        switch level {
+        case ..<20:
+            return .red
+        case ..<50:
+            return .orange
+        default:
+            return .green
         }
     }
 }

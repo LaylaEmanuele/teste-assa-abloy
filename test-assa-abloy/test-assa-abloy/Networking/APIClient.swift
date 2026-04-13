@@ -45,6 +45,10 @@ struct URLSessionAPIClient: APIClient {
             }
         } catch let error as NetworkError {
             throw error
+        } catch is CancellationError {
+            throw NetworkError.cancelled
+        } catch let error as URLError where error.code == .cancelled {
+            throw NetworkError.cancelled
         } catch {
             throw NetworkError.transportError(error)
         }
@@ -64,6 +68,10 @@ struct URLSessionAPIClient: APIClient {
             }
         } catch let error as NetworkError {
             throw error
+        } catch is CancellationError {
+            throw NetworkError.cancelled
+        } catch let error as URLError where error.code == .cancelled {
+            throw NetworkError.cancelled
         } catch {
             throw NetworkError.transportError(error)
         }

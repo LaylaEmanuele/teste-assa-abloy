@@ -12,6 +12,7 @@ enum NetworkError: LocalizedError {
     case invalidStatusCode(Int, APIErrorResponse?)
     case decodingFailed
     case encodingFailed
+    case cancelled
     case transportError(Error)
 
     var errorDescription: String? {
@@ -24,6 +25,8 @@ enum NetworkError: LocalizedError {
             return "Failed to decode the server response."
         case .encodingFailed:
             return "Failed to encode the request body."
+        case .cancelled:
+            return nil
         case let .transportError(error):
             return error.localizedDescription
         }

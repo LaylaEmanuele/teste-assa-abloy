@@ -9,7 +9,6 @@ import SwiftUI
 
 struct SignInView: View {
     @EnvironmentObject private var session: AppSession
-    @EnvironmentObject private var router: AppRouter
     @StateObject private var viewModel = SignInViewModel()
 
     var body: some View {
@@ -44,7 +43,6 @@ struct SignInView: View {
                         }
 
                         session.startSession(with: token)
-                        router.popToRoot()
                     }
                 } label: {
                     HStack {
