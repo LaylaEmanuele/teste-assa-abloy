@@ -73,6 +73,7 @@ struct DoorsHomeView: View {
             }
         }
         .navigationTitle("Portas")
+        .searchable(text: $viewModel.searchText, prompt: "Buscar por nome")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Sair") {
@@ -83,6 +84,13 @@ struct DoorsHomeView: View {
         }
         .task(id: session.token) {
             await viewModel.loadDoors(authToken: session.token)
+        }
+        .task(id: viewModel.searchText) {
+            try? await Task.sleep(for: .milliseconds(350))
+            guard !Task.isCancelled else {
+                return
+            }
+            await viewModel.searchDoors(authToken: session.token)
         }
         .onAppear {
             guard viewModel.doors.isEmpty else {
